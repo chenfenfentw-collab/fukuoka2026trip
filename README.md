@@ -1,0 +1,1 @@
+# fukuoka2026trip

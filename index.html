@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>2026 福岡之旅</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        :root {
+            --bg-color: #f4f4f5;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --accent-color: #3b82f6;
+            --border-color: #e5e7eb;
+            --danger-color: #ef4444;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #18181b;
+            --card-bg: #27272a;
+            --text-color: #e4e4e7;
+            --accent-color: #60a5fa;
+            --border-color: #3f3f46;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            padding-bottom: 80px; /* Nav height */
+            transition: background-color 0.3s;
+        }
+
+        header {
+            background-color: var(--card-bg);
+            padding: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1, h2, h3 { margin: 0; }
+        
+        .theme-toggle {
+            background: none;
+            border: 1px solid var(--text-color);
+            color: var(--text-color);
+            padding: 5px 10px;
+            border-radius: 15px;
+            cursor: pointer;
+        }
+
+        /* Weather Widget */
+        #weather-widget {
+            background: var(--accent-color);
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-size: 0.9em;
+            display: none; /* Hidden until loaded */
+        }
+
+        /* Container */
+        .container {
+            padding: 15px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Cards */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .time-loc {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--accent-color);
+        }
+
+        .desc {
+            font-size: 0.95em;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        .map-link {
+            display: inline-block;
+            margin-top: 8px;
+            font-size: 0.85em;
+            color: var(--text-color);
+            text-decoration: underline;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            z-index: 1000;
+        }
+
+        nav button {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 0.8em;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0.6;
+        }
+
+        nav button.active {
+            opacity: 1;
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        /* Forms & Inputs */
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0 15px 0;
+            box-sizing: border-box;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            width: 100%;
+            font-size: 1em;
+        }
+
+        .btn-delete {
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            margin-top: 10px;
+        }
+
+        /* Views */
+        .view { display: none; }
+        .view.active { display: block; }
+
+        /* Expense List */
+        .expense-item {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+            padding: 10px 0;
+        }
+        
+        .total-banner {
+            background: var(--card-bg);
+            padding: 15px;
+            position: sticky;
+            top: 60px;
+            z-index: 90;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Image Preview */
+        .img-preview {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        
+        .add-btn-float {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            background-color: var(--accent-color);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            border: none;
+        }
+
+        /* Day Header */
+        .day-header {
+            margin: 20px 0 10px 0;
+            padding-bottom: 5px;
+            border-bottom: 2px solid var(--accent-color);
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h2 id="page-title">每日行程</h2>
+    <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+</header>
+
+<div id="weather-widget">正在取得福岡天氣...</div>
+
+<div id="view-itinerary" class="view active container">
+    <div id="itinerary-list"></div>
+    <button class="add-btn-float" onclick="openModal('itinerary')">+</button>
+</div>
+
+<div id="view-expenses" class="view container">
+    <div class="total-banner">
+        <span>總花費 (TWD估算)</span>
+        <span id="total-amount">0</span>
+    </div>
+    <div id="expense-list"></div>
+    <button class="add-btn-float" onclick="openModal('expense')">+</button>
+</div>
+
+<div id="view-notes" class="view container">
+    <h3>備忘錄 & 清單</h3>
+    <div id="notes-list"></div>
+    <button class="add-btn-float" onclick="openModal('note')">+</button>
+</div>
+
+<nav>
+    <button onclick="switchView('itinerary')" class="active" id="nav-itinerary">
+        <span>📅</span>行程
+    </button>
+    <button onclick="switchView('expenses')" id="nav-expenses">
+        <span>💰</span>記帳
+    </button>
+    <button onclick="switchView('notes')" id="nav-notes">
+        <span>📝</span>備忘
+    </button>
+</nav>
+
+<div id="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2000; overflow-y:auto;">
+    <div style="background:var(--card-bg); margin: 50px auto; padding:20px; width:85%; max-width:400px; border-radius:12px;">
+        <h3 id="modal-title">新增</h3>
+        <div id="modal-content"></div>
+        <button onclick="closeModal()" style="background:transparent; border:1px solid var(--text-color); color:var(--text-color); padding:10px; width:100%; border-radius:8px; margin-top:10px;">取消</button>
+    </div>
+</div>
+
+<script src="app.js"></script>
+<script>
+    // 註冊 Service Worker
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js')
+            .then(() => console.log('Service Worker Registered'));
+    }
+</script>
+</body>
+</html>
